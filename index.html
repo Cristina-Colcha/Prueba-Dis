@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #chat-container {
+            width: 400px;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            max-height: 350px;
+        }
+
+        #message-input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: calc(100% - 22px);
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const apiUrl = 'http://your-ec2-public-ip:3000/messages'; // Cambia esto por la URL de tu backend
+
+        // Cargar mensajes al iniciar
+        window.onload = async () => {
+            const response = await fetch(apiUrl);
+            const messages = await response.json();
+            const messagesDiv = document.getElementById('messages');
+            messages.forEach(msg => {
+                const messageElem = document.createElement('p');
+                messageElem.innerText = `${msg.sender}: ${msg.message}`;
+                messagesDiv.appendChild(messageElem);
+            });
+        };
+
+        // Enviar mensaje
+        const sendMessage = async () => {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            const sender = 'User1'; // Puedes cambiar el nombre de usuario
+
+            if (message.trim() !== '') {
+                await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ sender, message })
+                });
+
+                const messagesDiv = document.getElementById('messages');
+                const messageElem = document.createElement('p');
+                messageElem.innerText = `${sender}: ${message}`;
+                messagesDiv.appendChild(messageElem);
+
+                messageInput.value = '';
+            }
+        };
+    </script>
+</body>
+</html>
