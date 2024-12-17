@@ -61,18 +61,26 @@
     </div>
 
     <script>
-        const apiUrl = 'http://your-ec2-public-ip:3000/messages'; // Cambia esto por la URL de tu backend
+        const apiUrl = 'http://localhost:3000/message';  // Asegúrate de que sea la URL correcta de tu backend
 
         // Cargar mensajes al iniciar
         window.onload = async () => {
-            const response = await fetch(apiUrl);
-            const messages = await response.json();
-            const messagesDiv = document.getElementById('messages');
-            messages.forEach(msg => {
-                const messageElem = document.createElement('p');
-                messageElem.innerText = `${msg.sender}: ${msg.message}`;
-                messagesDiv.appendChild(messageElem);
-            });
+            try {
+                const response = await fetch('http://localhost:3000/messages'); // Cargar mensajes desde el servidor
+                if (response.ok) {
+                    const messages = await response.json();
+                    const messagesDiv = document.getElementById('messages');
+                    messages.forEach(msg => {
+                        const messageElem = document.createElement('p');
+                        messageElem.innerText = `${msg.sender}: ${msg.message}`;
+                        messagesDiv.appendChild(messageElem);
+                    });
+                } else {
+                    console.error('Error al cargar los mensajes');
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+            }
         };
 
         // Enviar mensaje
@@ -82,20 +90,28 @@
             const sender = 'User1'; // Puedes cambiar el nombre de usuario
 
             if (message.trim() !== '') {
-                await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ sender, message })
-                });
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ sender, message })
+                    });
 
-                const messagesDiv = document.getElementById('messages');
-                const messageElem = document.createElement('p');
-                messageElem.innerText = `${sender}: ${message}`;
-                messagesDiv.appendChild(messageElem);
+                    if (response.ok) {
+                        const messagesDiv = document.getElementById('messages');
+                        const messageElem = document.createElement('p');
+                        messageElem.innerText = `${sender}: ${message}`;
+                        messagesDiv.appendChild(messageElem);
 
-                messageInput.value = '';
+                        messageInput.value = '';  // Limpiar el campo de entrada
+                    } else {
+                        console.error('Error al enviar el mensaje');
+                    }
+                } catch (error) {
+                    console.error('Error de red:', error);
+                }
             }
         };
     </script>
