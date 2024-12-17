@@ -61,7 +61,9 @@
     </div>
 
     <script>
-        const apiUrl = 'http://localhost:3000/message';  // Asegúrate de que sea la URL correcta de tu backend
+        const apiUrl = 'http://localhost:3000/message';  // URL del backend
+        const socket = new WebSocket('ws://localhost:3001');  // Conexión WebSocket para recibir mensajes en tiempo real
+        const userId = 'User' + Math.floor(Math.random() * 1000); // Generación de ID único para el usuario
 
         // Cargar mensajes al iniciar
         window.onload = async () => {
@@ -87,7 +89,6 @@
         const sendMessage = async () => {
             const messageInput = document.getElementById('message-input');
             const message = messageInput.value;
-            const sender = 'User1'; // Puedes cambiar el nombre de usuario
 
             if (message.trim() !== '') {
                 try {
@@ -96,15 +97,10 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ sender, message })
+                        body: JSON.stringify({ sender: userId, message })
                     });
 
                     if (response.ok) {
-                        const messagesDiv = document.getElementById('messages');
-                        const messageElem = document.createElement('p');
-                        messageElem.innerText = `${sender}: ${message}`;
-                        messagesDiv.appendChild(messageElem);
-
                         messageInput.value = '';  // Limpiar el campo de entrada
                     } else {
                         console.error('Error al enviar el mensaje');
@@ -114,6 +110,15 @@
                 }
             }
         };
+
+        // Recibir mensajes en tiempo real a través de WebSocket
+        socket.onmessage = (event) => {
+            const messagesDiv = document.getElementById('messages');
+            const messageElem = document.createElement('p');
+            messageElem.innerText = event.data;
+            messagesDiv.appendChild(messageElem);
+        };
+
     </script>
 </body>
 </html>
